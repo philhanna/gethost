@@ -39,7 +39,7 @@ func main() {
 
 		if matched, _ := regexp.MatchString(`[\d.]+`, addr); matched {
 
-			// Check if the IP address is well-formed
+			// Check whether the IP address is well-formed
 
 			if m, _ := regexp.MatchString(`(\d+)\.(\d+)\.(\d+)\.(\d+)`, addr); !m {
 				fmt.Printf("Malformed address: %s\n", addr)
@@ -49,22 +49,18 @@ func main() {
 			// Look up the hostname, aliases, and IP addresses
 			// associated with the address
 
-			name, err := net.LookupAddr(addr)
+			names, err := net.LookupAddr(addr)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
+			ips, _ := net.LookupIP(addr)
 
 			// Print the hostname, aliases, and IP addresses associated
 			// with the address
 
-			fmt.Printf("name       = %s\n", name[0])
-			aliases, _ := net.LookupCNAME(addr)
-			fmt.Printf("aliases    = %s\n", aliases)
-			ips, _ := net.LookupIP(addr)
-			for _, ip := range ips {
-				fmt.Printf("addrs      = %s\n", ip.String())
-			}
+			PrintNames(names[0], addr, ips)
+
 		} else {
 
 			// Look up the IP addresses associated with the hostname
@@ -78,7 +74,7 @@ func main() {
 			// Look up the hostname, aliases, and IP addresses
 			// associated with the first IP address
 
-			name, err := net.LookupAddr(ips[0].String())
+			names, err := net.LookupAddr(ips[0].String())
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -87,12 +83,16 @@ func main() {
 			// Print the hostname, aliases, and IP addresses associated
 			// with the hostname
 
-			fmt.Printf("name       = %s\n", name[0])
-			aliases, _ := net.LookupCNAME(addr)
-			fmt.Printf("aliases    = %s\n", aliases)
-			for _, ip := range ips {
-				fmt.Printf("addrs      = %s\n", ip.String())
-			}
+			PrintNames(names[0], addr, ips)
 		}
+	}
+}
+
+func PrintNames(name string, addr string, ips []net.IP) {
+	fmt.Printf("name       = %s\n", name)
+	aliases, _ := net.LookupCNAME(addr)
+	fmt.Printf("aliases    = %s\n", aliases)
+	for _, ip := range ips {
+		fmt.Printf("addrs      = %s\n", ip.String())
 	}
 }
