@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"regexp"
+	"strings"
 )
 
 func main() {
@@ -26,8 +27,9 @@ func main() {
 // Handles an IP address of the form 999.999.999.999
 func handleIPAddress(addr string) {
 
-	// Print IP address
-	fmt.Printf("addr       = %s\n", addr)
+	lines := make([]string, 0)
+	
+	lines = append(lines, "addr," + addr)
 
 	// Look up the hostname, aliases, and IP addresses
 	// associated with the address
@@ -36,23 +38,26 @@ func handleIPAddress(addr string) {
 		log.Fatal(err)
 	}
 	for _, name := range names {
-		fmt.Printf("name       = %s\n", name)
+		lines = append(lines, "name," + name)
 	}
 
+	printLines(lines)
 }
 
 // Handles a host name string
 func handleHostName(hostName string) {
 
+	lines := make([]string, 0)
+
 	// Print host name
-	fmt.Printf("name       = %s\n", hostName)
+	lines = append(lines, "name," + hostName)
 
 	// Print canonical name, if available
 	cname, err := net.LookupCNAME(hostName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("alias      = %s\n", cname)
+	lines = append(lines, "canonical name," + cname)
 
 	// Look up the IP addresses associated with the hostname
 	ips, err := net.LookupIP(hostName)
@@ -60,6 +65,32 @@ func handleHostName(hostName string) {
 		log.Fatal(err)
 	}
 	for _, ipAddress := range ips {
-		fmt.Printf("addr       = %s\n", ipAddress.String())
+		lines = append(lines, "addr," + ipAddress.String())
+	}
+
+	printLines(lines)
+}
+
+func printLines(lines []string) {
+	keys := make([]string, 0)
+	values := make([]string, 0)
+	maxWidth := 0
+	for _, line := range lines {
+		tokens := strings.Split(line, ",")
+		key, value := tokens[0], tokens[1]
+		width := len(key)
+		if width > maxWidth {
+			maxWidth = width
+		}
+		keys = append(keys, key)
+		values = append(values, value)
+	}
+
+	wString := fmt.Sprintf("%%-%d", maxWidth)
+	for i := 0; i < len(keys); i++ {
+		key := keys[i]
+		value := values[i]
+		paddedKey := fmt.Sprintf(wString, key)
+		fmt.Printf("%s: %s\n", paddedKey, value)
 	}
 }
