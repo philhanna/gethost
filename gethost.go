@@ -63,6 +63,7 @@ func main() {
 
 		} else {
 
+			fmt.Printf("DEBUG: addr=%q", addr)
 			// Look up the IP addresses associated with the hostname
 
 			ips, err := net.LookupIP(addr)
