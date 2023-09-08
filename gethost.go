@@ -86,11 +86,12 @@ func printLines(lines []string) {
 		values = append(values, value)
 	}
 
-	wString := fmt.Sprintf("%%-%d", maxWidth)
 	for i := 0; i < len(keys); i++ {
-		key := keys[i]
+		key := keys[i] + ":"
+		for len(key) < maxWidth+4 {
+			key += " "
+		}
 		value := values[i]
-		paddedKey := fmt.Sprintf(wString, key)
-		fmt.Printf("%s: %s\n", paddedKey, value)
+		fmt.Printf("%s %s\n", key, value)
 	}
 }
